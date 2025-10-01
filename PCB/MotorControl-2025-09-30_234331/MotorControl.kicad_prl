@@ -5,7 +5,7 @@
     "auto_track_width": true,
     "hidden_netclasses": [],
     "hidden_nets": [],
-    "high_contrast_mode": 1,
+    "high_contrast_mode": 0,
     "net_color_mode": 1,
     "opacity": {
       "images": 0.6,
@@ -33,7 +33,6 @@
       "footprint_text",
       "footprint_anchors",
       "ratsnest",
-      "grid",
       "footprints_front",
       "footprints_back",
       "footprint_values",
@@ -88,16 +87,16 @@
       9
     ],
     "col_widths": [
-      10,
-      10,
-      10,
-      10,
-      10,
-      10,
-      10,
-      10,
-      10,
-      114
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
     ],
     "custom_group_rules": [],
     "expanded_rows": [],

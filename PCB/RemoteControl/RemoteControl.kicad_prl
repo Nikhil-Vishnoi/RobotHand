@@ -33,7 +33,6 @@
       "footprint_text",
       "footprint_anchors",
       "ratsnest",
-      "grid",
       "footprints_front",
       "footprints_back",
       "footprint_values",
@@ -51,7 +50,7 @@
       "shapes"
     ],
     "visible_layers": "ffffffff_ffffffff_ffffffff_ffffffff",
-    "zone_display_mode": 1
+    "zone_display_mode": 0
   },
   "git": {
     "repo_type": "",
@@ -88,16 +87,16 @@
       9
     ],
     "col_widths": [
-      222,
-      207,
-      136,
-      92,
-      136,
-      136,
-      136,
-      98,
-      136,
-      136
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
     ],
     "custom_group_rules": [],
     "expanded_rows": [],
