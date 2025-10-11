@@ -1,0 +1,10 @@
+../Core/Src/pca9685.c:54:13:pca9685_write_u8	40	static
+../Core/Src/pca9685.c:60:13:pca9685_write_data	48	static
+../Core/Src/pca9685.c:74:13:pca9685_read_u8	40	static
+../Core/Src/pca9685.c:83:6:pca9685_init	32	static
+../Core/Src/pca9685.c:111:6:pca9685_is_sleeping	32	static
+../Core/Src/pca9685.c:125:6:pca9685_sleep	32	static
+../Core/Src/pca9685.c:141:6:pca9685_wakeup	40	static
+../Core/Src/pca9685.c:168:6:pca9685_set_pwm_frequency	32	static
+../Core/Src/pca9685.c:197:6:pca9685_set_channel_pwm_times	32	static
+../Core/Src/pca9685.c:212:6:pca9685_set_channel_duty_cycle	40	static
