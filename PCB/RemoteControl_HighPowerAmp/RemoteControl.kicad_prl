@@ -59,7 +59,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "MotorControl.kicad_prl",
+    "filename": "RemoteControl.kicad_prl",
     "version": 5
   },
   "net_inspector_panel": {
@@ -88,16 +88,16 @@
       9
     ],
     "col_widths": [
-      222,
-      207,
-      136,
-      92,
-      136,
-      136,
-      136,
-      98,
-      136,
-      136
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      114
     ],
     "custom_group_rules": [],
     "expanded_rows": [],
