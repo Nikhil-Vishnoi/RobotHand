@@ -60,8 +60,8 @@ all: main-build
 main-build: MotorController.elf secondary-outputs
 
 # Tool invocations
-MotorController.elf MotorController.map: $(OBJS) $(USER_OBJS) /home/marco/STM32CubeIDE/workspace_1.19.0/MotorController/STM32L031K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "MotorController.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"/home/marco/STM32CubeIDE/workspace_1.19.0/MotorController/STM32L031K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MotorController.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+MotorController.elf MotorController.map: $(OBJS) $(USER_OBJS) C:\Users\nvswe\Desktop\395\STM32_Motor\STM32L031K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "MotorController.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\nvswe\Desktop\395\STM32_Motor\STM32L031K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MotorController.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

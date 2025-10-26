@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "pca9685.h"
+//#include "adc_interrupt.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -106,11 +106,8 @@ int main(void)
       .inverted = false
   };
 
-  // Initialise driver (performs basic setup).
-  uint8_t on[] = "ADC[0]: ";
-  uint8_t off[] = "ADC[1]: ";
+  // Initialize driver (performs basic setup).
   pca9685_init(&handle);
-  HAL_ADC_Start(&hadc);
   // Set PWM frequency.
   // The frequency must be between 24Hz and 1526Hz.
   pca9685_set_pwm_frequency(&handle, 50.0f);
@@ -120,19 +117,29 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint16_t adc_val[2];
-  HAL_ADC_Start_DMA(&hadc, adc_val, 4);
+  uint16_t adc_val[5];
+  HAL_ADC_Start_DMA_IT(&hadc, adc_val, 5);
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_ADC_Start(&hadc);
-	  HAL_Delay(200);
+	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
-	  char str_buffer[100];
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+
+	  char str_buffer[500];
+//	  while(adc_ready==0) {
+//
+//		  continue;
+//	  }
+//	  adc_ready = 0;
+	  sprintf(str_buffer,"ADC 1: %u | ADC 2: %u | ADC 3: %u | ADC 4: %u | ADC 5: %u \r\n",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
+	  HAL_UART_Transmit(&hlpuart1,str_buffer,strlen(str_buffer),5000);
+
+#ifdef SERVOMOVE
 	  float val = (float) adc_val[1] / 80000.0;
-
 	  val = 0.05;
 	  if(adc_val[0] > 1500.0) val = 0.10;
 	  pca9685_set_channel_duty_cycle(&handle, 0, val, false);
@@ -141,10 +148,7 @@ int main(void)
 	  if(adc_val[1] > 1200.0) val2 = 0.10;
 
 	  pca9685_set_channel_duty_cycle(&handle, 1, val2, false);
-	  if(iterations == 100){
-		  iterations = 50;
-	  }
-	  iterations += 1;
+#endif
   }
   /* USER CODE END 3 */
 }
@@ -252,6 +256,30 @@ static void MX_ADC_Init(void)
   /** Configure for the selected ADC regular channel to be converted.
   */
   sConfig.Channel = ADC_CHANNEL_1;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel to be converted.
+  */
+  sConfig.Channel = ADC_CHANNEL_4;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel to be converted.
+  */
+  sConfig.Channel = ADC_CHANNEL_5;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel to be converted.
+  */
+  sConfig.Channel = ADC_CHANNEL_6;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
     Error_Handler();
