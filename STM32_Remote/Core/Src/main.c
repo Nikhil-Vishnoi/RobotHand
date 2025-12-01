@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Nora.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +58,12 @@ static void MX_ADC_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+UART_HandleTypeDef* getNoraPort(){
+	return &hlpuart1;
+}
+UART_HandleTypeDef* getDebugPort(){
+	return &huart2;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -102,23 +107,16 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t rx[128];
-  // boot up uconnect press
-  HAL_GPIO_WritePin(Switch1_GPIO_Port, Switch1_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(Switch2_GPIO_Port, Switch2_Pin, GPIO_PIN_SET);
+//  // boot up uconnect press
+  Nora_startup();
 
-  // Boot into AT mode
-  HAL_GPIO_WritePin(GPIO_J9_GPIO_Port, GPIO_J9_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_RESET);
-  HAL_Delay(10);
-  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_SET);
-  HAL_Delay(2000);
-  HAL_UART_Receive(&hlpuart1, rx, sizeof(rx), 1000);
-  HAL_UART_Transmit(&huart2, rx, strlen((char*)rx), 500);
-
-//  HAL_ADC_Start(&hadc);
   static uint16_t adc_val[5];
   HAL_ADC_Start_DMA(&hadc, adc_val, 5);
+  Nora_command("AT\r\n");
+  Nora_command("AT\r\n");
+  Nora_command("AT\r\n");
+  Nora_command("AT\r\n");
+  Nora_command("AT\r\n");
 
   /* USER CODE END 2 */
 
@@ -129,28 +127,39 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	  i++;
 
 	  HAL_ADC_Start(&hadc);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-
-	  char str_buffer[500];
-	  sprintf(str_buffer,"ADC 1: %u | ADC 2: %u | ADC 3: %u | ADC 4: %u | ADC 5: %u \r\n\0",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
-	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
-
-	  // Send AT
-	  char *cmd = "AT\r\n";
-	  HAL_UART_Transmit(&hlpuart1, (uint8_t*)cmd, strlen(cmd), 100);
 	  HAL_Delay(100);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-	  // Receive response
-	  int rec = HAL_UART_Receive(&hlpuart1, rx, sizeof(rx), 500);
+	  char str_buffer[500];
+	  sprintf(str_buffer,"\n\nADC 1: %u | ADC 2: %u | ADC 3: %u | ADC 4: %u | ADC 5: %u \r\n\0",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
+//	  if(i == 1)
+	  //HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
 
-	  // Echo to USB debug UART
-	  HAL_UART_Transmit(&huart2, rx, strlen((char*)rx), 500);
+	  // Send AT
+//
+	  char *cmd = "AT\r\n";
+
+	  HAL_UART_Transmit(&hlpuart1, (uint8_t*)cmd, strlen(cmd), 100);
+	  HAL_Delay(100);
+	  // Receive response
+	  char rx[500];
+
+	  int rec = HAL_UART_Receive(&hlpuart1, rx, sizeof(rx), 500);
+//	  rx[rec+1]='\0';
+	  char str_buffer2[500];
+	  sprintf(str_buffer2,"\nRead Out from %s %d characters: \r\n\0",cmd,rec);
+
+	  HAL_UART_Transmit(&huart2, str_buffer2, strlen(str_buffer2), 500);
+	  HAL_UART_Transmit(&huart2, rx, rec, 500);
+
 
   }
   /* USER CODE END 3 */
 }
+
 
 /**
   * @brief System Clock Configuration
