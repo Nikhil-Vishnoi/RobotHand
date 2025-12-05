@@ -1,5 +1,4 @@
-Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr.o: \
- ../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr.c \
+Core/Src/Nora.o: ../Core/Src/Nora.c ../Core/Inc/Nora.h ../Core/Inc/main.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h \
  ../Core/Inc/stm32l0xx_hal_conf.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rcc.h \
@@ -27,6 +26,8 @@ Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr.o: \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr_ex.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h \
  ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h
+../Core/Inc/Nora.h:
+../Core/Inc/main.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
 ../Core/Inc/stm32l0xx_hal_conf.h:
 ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rcc.h:

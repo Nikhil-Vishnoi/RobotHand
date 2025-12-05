@@ -57,6 +57,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define NReset_Pin GPIO_PIN_7
+#define NReset_GPIO_Port GPIOA
+#define LED_Pin GPIO_PIN_1
+#define LED_GPIO_Port GPIOB
+#define GPIO_J9_Pin GPIO_PIN_3
+#define GPIO_J9_GPIO_Port GPIOB
+#define Switch1_Pin GPIO_PIN_4
+#define Switch1_GPIO_Port GPIOB
+#define Switch2_Pin GPIO_PIN_5
+#define Switch2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

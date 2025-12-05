@@ -40,12 +40,10 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc;
-
 I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef hlpuart1;
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* USER CODE END PV */
@@ -53,12 +51,16 @@ UART_HandleTypeDef hlpuart1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_ADC_Init(void);
 static void MX_LPUART1_UART_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+UART_HandleTypeDef* getNoraPort(){
+	return &hlpuart1;
+}
+UART_HandleTypeDef* getDebugPort(){
+	return &huart2;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -95,10 +97,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_I2C1_Init();
-  MX_ADC_Init();
   MX_LPUART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   pca9685_handle_t handle = {
       .i2c_handle = &hi2c1,
@@ -108,47 +109,37 @@ int main(void)
 
   // Initialize driver (performs basic setup).
   pca9685_init(&handle);
+//  Nora_startup();
   // Set PWM frequency.
   // The frequency must be between 24Hz and 1526Hz.
   pca9685_set_pwm_frequency(&handle, 50.0f);
-  int iterations = 50;
   //pca9685_set_channel_duty_cycle(&handle, 0, 0.2f, false);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint16_t adc_val[5];
-  HAL_ADC_Start_DMA_IT(&hadc, adc_val, 5);
+  float val = .05;
+  Nora_startup();
+
   while (1)
   {
+	  if(val > .10)
+		  val = .05;
+	  Nora_command("AT\r\n");
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-
 	  char str_buffer[500];
-//	  while(adc_ready==0) {
-//
-//		  continue;
-//	  }
-//	  adc_ready = 0;
-	  sprintf(str_buffer,"ADC 1: %u | ADC 2: %u | ADC 3: %u | ADC 4: %u | ADC 5: %u \r\n",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
-	  HAL_UART_Transmit(&hlpuart1,str_buffer,strlen(str_buffer),5000);
-
-#ifdef SERVOMOVE
-	  float val = (float) adc_val[1] / 80000.0;
-	  val = 0.05;
-	  if(adc_val[0] > 1500.0) val = 0.10;
+	  sprintf(str_buffer,"\n\nSetting duty cycle to %d\r\n\0",val);
+	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
 	  pca9685_set_channel_duty_cycle(&handle, 0, val, false);
-
-	  float val2 = 0.05;
-	  if(adc_val[1] > 1200.0) val2 = 0.10;
-
-	  pca9685_set_channel_duty_cycle(&handle, 1, val2, false);
-#endif
+	  pca9685_set_channel_duty_cycle(&handle, 1, val, false);
+	  pca9685_set_channel_duty_cycle(&handle, 2, val, false);
+	  pca9685_set_channel_duty_cycle(&handle, 3, val, false);
+	  pca9685_set_channel_duty_cycle(&handle, 4, val, false);
+	  val = val + .01;
+	  HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -193,101 +184,15 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_LPUART1
+                              |RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief ADC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC_Init(void)
-{
-
-  /* USER CODE BEGIN ADC_Init 0 */
-
-  /* USER CODE END ADC_Init 0 */
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN ADC_Init 1 */
-
-  /* USER CODE END ADC_Init 1 */
-
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc.Instance = ADC1;
-  hadc.Init.OversamplingMode = DISABLE;
-  hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
-  hadc.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc.Init.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
-  hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc.Init.ContinuousConvMode = DISABLE;
-  hadc.Init.DiscontinuousConvMode = DISABLE;
-  hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc.Init.DMAContinuousRequests = DISABLE;
-  hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc.Init.LowPowerAutoWait = DISABLE;
-  hadc.Init.LowPowerFrequencyMode = ENABLE;
-  hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  if (HAL_ADC_Init(&hadc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_1;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_4;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_5;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel to be converted.
-  */
-  sConfig.Channel = ADC_CHANNEL_6;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC_Init 2 */
-
-  /* USER CODE END ADC_Init 2 */
-
 }
 
 /**
@@ -354,7 +259,7 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 19200;
+  hlpuart1.Init.BaudRate = 115200;
   hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
@@ -373,18 +278,37 @@ static void MX_LPUART1_UART_Init(void)
 }
 
 /**
-  * Enable DMA controller clock
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
   */
-static void MX_DMA_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* DMA interrupt init */
-  /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -405,10 +329,20 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PB0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED_Pin|GPIO_J9_Pin|Switch1_Pin|Switch2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : NReset_Pin */
+  GPIO_InitStruct.Pin = NReset_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(NReset_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED_Pin GPIO_J9_Pin Switch1_Pin Switch2_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|GPIO_J9_Pin|Switch1_Pin|Switch2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
