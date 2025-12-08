@@ -108,16 +108,21 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 //  // boot up uconnect press
-  Nora_startup();
+//  Nora_startup();
 
   static uint16_t adc_val[5];
   HAL_ADC_Start_DMA(&hadc, adc_val, 5);
-  Nora_command("AT\r\n");
-  Nora_command("AT\r\n");
-  Nora_command("AT\r\n");
-  Nora_command("AT\r\n");
-  Nora_command("AT\r\n");
-
+  int thm, im, mm, rm, pm, ths, is, ms, rs, ps;
+  thm = -1;
+  im = -1;
+  mm = -1;
+  rm = -1;
+  pm = -1;
+  ths = -1;
+  is = -1;
+  ms = -1;
+  rs = -1;
+  ps = -1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -128,38 +133,109 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 //	  i++;
-
+//	  Nora_command("AT\r\n");
 	  HAL_ADC_Start(&hadc);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-	  HAL_Delay(100);
+	  HAL_Delay(500);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 	  char str_buffer[500];
-	  sprintf(str_buffer,"\n\nADC 1: %u | ADC 2: %u | ADC 3: %u | ADC 4: %u | ADC 5: %u \r\n\0",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
-//	  if(i == 1)
-	  //HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+	  if(thm == -1 || thm < adc_val[4]) {
+		  thm = adc_val[4];
+	  }
+	  if(im == -1 || im < adc_val[3]) {
+		  im = adc_val[3];
+	  }
+	  if(mm == -1 || mm < adc_val[2]) {
+		  mm = adc_val[2];
+	  }
+	  if(rm == -1 || rm < adc_val[1]) {
+		  rm = adc_val[1];
+	  }
+	  if(pm == -1 || pm < adc_val[0]) {
+		  pm = adc_val[0];
+	  }
+	  if(ths == -1) {
+		  ths = adc_val[4]/2;
+	  }
+	  if(is == -1) {
+		  is = adc_val[3]/2;
+	  }
+	  if(ms == -1 ) {
+		  ms = adc_val[2]/2;
+	  }
+	  if(rs == -1) {
+		  rs = adc_val[1]/2;
+	  }
+	  if(ps == -1) {
+		  ps = adc_val[0]/2;
+	  }
+	  if(ths > adc_val[4]) {
+		  ths = adc_val[4];
+	  }
+	  if(is > adc_val[3]) {
+		  is = adc_val[3];
+	  }
+	  if(ms > adc_val[2]) {
+		  ms = adc_val[2];
+	  }
+	  if(rs > adc_val[1]) {
+		  rs = adc_val[1];
+	  }
+	  if(ps > adc_val[0]) {
+		  ps = adc_val[0];
+	  }
+
+
+
+//	  sprintf(str_buffer,"\r\nPinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",adc_val[0],adc_val[1],adc_val[2],adc_val[3],adc_val[4]);
+//
+////	  if(i == 1)
+//	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+//	  sprintf(str_buffer,"\r\nMaxes Pinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",
+//			  pm,rm,mm,im,thm);
+//	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+//	  sprintf(str_buffer,"\r\nMins Pinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",
+//			  ps,rs,ms,is,ths);
+//	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+	  sprintf(str_buffer,
+	      "\r\nAngles Pinky: %3d | Ring: %3d | Middle: %3d | Index: %3d | Thumb: %3d\r\n\0",
+	      (adc_val[0] - ps) * 180 / (pm - ps),
+	      (adc_val[1] - rs) * 180 / (rm - rs),
+	      (adc_val[2] - ms) * 180 / (mm - ms),
+	      (adc_val[3] - is) * 180 / (im - is),
+	      (adc_val[4] - ths) * 180 / (thm - ths)
+	  );
+//	  sprintf(str_buffer,"\r\nPinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",
+//			  (adc_val[0]-ps)/(pm-ps)*100,
+//			  (adc_val[1]-rs)/(rm-rs)*100,
+//			  (adc_val[2]-ms)/(mm-ms)*100,
+//			  (adc_val[3]-is)/(im-is)*100,
+//			  (adc_val[4]-ths)/(thm-ths)*100);
+	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+
 
 	  // Send AT
+
 //
-	  char *cmd = "AT\r\n";
-
-	  HAL_UART_Transmit(&hlpuart1, (uint8_t*)cmd, strlen(cmd), 100);
-	  HAL_Delay(100);
-	  // Receive response
-	  char rx[500];
-
-	  int rec = HAL_UART_Receive(&hlpuart1, rx, sizeof(rx), 500);
-//	  rx[rec+1]='\0';
-	  char str_buffer2[500];
-	  sprintf(str_buffer2,"\nRead Out from %s %d characters: \r\n\0",cmd,rec);
-
-	  HAL_UART_Transmit(&huart2, str_buffer2, strlen(str_buffer2), 500);
-	  HAL_UART_Transmit(&huart2, rx, rec, 500);
+//	  char *cmd = "AT\r\n";
+//
+//	  HAL_UART_Transmit(&hlpuart1, (uint8_t*)cmd, strlen(cmd), 100);
+//	  HAL_Delay(100);
+//	  // Receive response
+//	  char rx[500];
+//
+//	  int rec = HAL_UART_Receive(&hlpuart1, rx, sizeof(rx), 500);
+////	  rx[rec+1]='\0';
+//	  char str_buffer2[500];
+//	  sprintf(str_buffer2,"\nRead Out from %s %d characters: \r\n\0",cmd,rec);
+//
+//	  HAL_UART_Transmit(&huart2, str_buffer2, strlen(str_buffer2), 500);
+//	  HAL_UART_Transmit(&huart2, rx, rec, 500);
 
 
   }
   /* USER CODE END 3 */
 }
-
 
 /**
   * @brief System Clock Configuration
@@ -348,7 +424,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 19200;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

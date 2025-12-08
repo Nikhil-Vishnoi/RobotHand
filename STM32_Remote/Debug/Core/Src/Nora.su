@@ -1,2 +1,2 @@
 ../Core/Src/Nora.c:12:6:Nora_startup	552	static
-../Core/Src/Nora.c:31:6:Nora_command	568	static
+../Core/Src/Nora.c:38:6:Nora_command	568	static

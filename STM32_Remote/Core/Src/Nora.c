@@ -10,10 +10,19 @@
 #include "main.h"
 
 void Nora_startup(){
+	  char str_buffer3[500];
+	  sprintf(str_buffer3,"\r\n _______________________ \r\n NEW RUN \r\n _______________________ \r\n\0");
+	  HAL_UART_Transmit(getDebugPort(),(uint8_t*)str_buffer3,strlen(str_buffer3),5000);
 	  uint8_t rx[30];
+	  HAL_GPIO_WritePin(Switch1_GPIO_Port, Switch1_Pin, GPIO_PIN_RESET);
+	  HAL_GPIO_WritePin(Switch1_GPIO_Port, Switch1_Pin, GPIO_PIN_SET);
+
+	  HAL_GPIO_WritePin(GPIO_J9_GPIO_Port, GPIO_J9_Pin, GPIO_PIN_RESET);
 
 	  // Boot into AT mode
-	  HAL_GPIO_WritePin(GPIO_J9_GPIO_Port, GPIO_J9_Pin, GPIO_PIN_RESET);
+//	  HAL_GPIO_WritePin(GPIO_J9_GPIO_Port, GPIO_J9_Pin, GPIO_PIN_RESET);
+	  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_RESET);
+	  HAL_Delay(10);
 	  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_SET);
 	//  HAL_Delay(10);
 	//  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_SET);
@@ -23,9 +32,7 @@ void Nora_startup(){
 
 	  HAL_UART_Receive(getNoraPort(), rx, sizeof(rx), 1000);
 	  HAL_UART_Transmit(getDebugPort(), rx, strlen((char*)rx), 500);
-	  char str_buffer3[500];
-	  sprintf(str_buffer3,"\r\n _______________________ \r\n NEW RUN \r\n _______________________ \r\n\0");
-	  HAL_UART_Transmit(getDebugPort(),(uint8_t*)str_buffer3,strlen(str_buffer3),5000);
+
 }
 
 void Nora_command(const char *cmd) {
