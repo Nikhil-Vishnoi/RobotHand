@@ -135,9 +135,8 @@ int main(void)
 //	  i++;
 //	  Nora_command("AT\r\n");
 	  HAL_ADC_Start(&hadc);
+	  HAL_Delay(100);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-	  HAL_Delay(500);
-	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 	  char str_buffer[500];
 	  if(thm == -1 || thm < adc_val[4]) {
 		  thm = adc_val[4];
@@ -197,23 +196,35 @@ int main(void)
 //	  sprintf(str_buffer,"\r\nMins Pinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",
 //			  ps,rs,ms,is,ths);
 //	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+//	  sprintf(str_buffer,
+//	      "\r\nAngles Pinky: %3d | Ring: %3d | Middle: %3d | Index: %3d | Thumb: %3d\r\n\0",
+//	      (adc_val[0] - ps) * 180 / (pm - ps),
+//	      (adc_val[1] - rs) * 180 / (rm - rs),
+//	      (adc_val[2] - ms) * 180 / (mm - ms),
+//	      (adc_val[3] - is) * 180 / (im - is),
+//	      (adc_val[4] - ths) * 180 / (thm - ths)
+//	  );
 	  sprintf(str_buffer,
-	      "\r\nAngles Pinky: %3d | Ring: %3d | Middle: %3d | Index: %3d | Thumb: %3d\r\n\0",
-	      (adc_val[0] - ps) * 180 / (pm - ps),
-	      (adc_val[1] - rs) * 180 / (rm - rs),
-	      (adc_val[2] - ms) * 180 / (mm - ms),
-	      (adc_val[3] - is) * 180 / (im - is),
-	      (adc_val[4] - ths) * 180 / (thm - ths)
-	  );
+	  	      "%c%c%c%c%c",
+	  	      (adc_val[0] - ps) * 180 / (pm - ps),
+			  (adc_val[1] - rs) * 180 / (rm - rs),
+			  180-(adc_val[2] - ms) * 180 / (mm - ms),
+			  (adc_val[3] - is) * 180 / (im - is),
+			  180-(adc_val[4] - ths) * 180 / (thm - ths)
+	  	  );
 //	  sprintf(str_buffer,"\r\nPinky: %u | Ring: %u | Middle 3: %u | Index 4: %u | Thumb 5: %u \r\n\0",
 //			  (adc_val[0]-ps)/(pm-ps)*100,
 //			  (adc_val[1]-rs)/(rm-rs)*100,
 //			  (adc_val[2]-ms)/(mm-ms)*100,
 //			  (adc_val[3]-is)/(im-is)*100,
 //			  (adc_val[4]-ths)/(thm-ths)*100);
-	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
-
-
+	  char strbuff2[1];
+	  while(HAL_UART_Receive(&huart2,strbuff2,1,50) != HAL_OK) {
+//		  sprintf(str_buffer,"WAITING ON COMMAND\n");
+//		  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
+	  }
+	  HAL_UART_Transmit(&huart2,str_buffer,5,50);
+	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 	  // Send AT
 
 //

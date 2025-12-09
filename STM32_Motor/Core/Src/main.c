@@ -55,12 +55,6 @@ static void MX_I2C1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-UART_HandleTypeDef* getNoraPort(){
-	return &hlpuart1;
-}
-UART_HandleTypeDef* getDebugPort(){
-	return &huart2;
-}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,28 +112,43 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  float val = .05;
-  Nora_startup();
-
+////  Nora_startup();
+//  for(int i = 0; i < 5;i++) {
+//	  Nora_command("AT\r\n");
+//	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+//  }
+//  while(1) {
+//	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+//  }
   while (1)
   {
-	  if(val > .10)
-		  val = .05;
-	  Nora_command("AT\r\n");
+//	  Nora_command("AT\r\n");
+
+	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  char str_buffer[500];
-	  sprintf(str_buffer,"\n\nSetting duty cycle to %d\r\n\0",val);
-	  HAL_UART_Transmit(&huart2,str_buffer,strlen(str_buffer),5000);
-	  pca9685_set_channel_duty_cycle(&handle, 0, val, false);
-	  pca9685_set_channel_duty_cycle(&handle, 1, val, false);
-	  pca9685_set_channel_duty_cycle(&handle, 2, val, false);
-	  pca9685_set_channel_duty_cycle(&handle, 3, val, false);
-	  pca9685_set_channel_duty_cycle(&handle, 4, val, false);
-	  val = val + .01;
-	  HAL_Delay(100);
+	  uint8_t degrees[5];
+	  uint8_t str_buffer[1] = "p";
+//	  sprintf(str_buffer,"p");
+	  // ask for new
+	  HAL_UART_Transmit(&huart2,str_buffer,1,50);
+	  if(HAL_UART_Receive(&huart2,degrees,5,50) == HAL_OK)  {
+
+		  pca9685_set_channel_duty_cycle(&handle, 0, degrees[0]*.14/180.0+.01, false);
+		  pca9685_set_channel_duty_cycle(&handle, 1, degrees[1]*.14/180.0+.01, false);
+		  pca9685_set_channel_duty_cycle(&handle, 2, degrees[2]*.14/180.0+.01, false);
+		  pca9685_set_channel_duty_cycle(&handle, 3, degrees[3]*.14/180.0+.01, false);
+		  pca9685_set_channel_duty_cycle(&handle, 4, degrees[4]*.14/180.0+.01, false);
+	  }
+	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
   }
   /* USER CODE END 3 */
 }
@@ -341,14 +350,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(NReset_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_Pin GPIO_J9_Pin Switch1_Pin Switch2_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|GPIO_J9_Pin|Switch1_Pin|Switch2_Pin;
+  /*Configure GPIO pins : LED_Pin GPIO_J9_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|GPIO_J9_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : Switch1_Pin Switch2_Pin */
+  GPIO_InitStruct.Pin = Switch1_Pin|Switch2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+//  HAL_GPIO_WritePin(GPIOB, GPIO_J9_Pin|Switch1_Pin|Switch2_Pin, GPIO_PIN_SET);
+//  HAL_GPIO_WritePin(NReset_GPIO_Port, NReset_Pin, GPIO_PIN_SET);
+//  HAL_GPIO_WritePin(GPIOB, LED_Pin, GPIO_PIN_RESET);
+
 
   /* USER CODE END MX_GPIO_Init_2 */
 }

@@ -1,2 +1,3 @@
-../Core/Src/Nora.c:12:6:Nora_startup	1
-../Core/Src/Nora.c:37:6:Nora_command	1
+../Core/Src/Nora.c:13:13:debug_print_hex	2
+../Core/Src/Nora.c:26:6:Nora_startup	3
+../Core/Src/Nora.c:74:6:Nora_command	1
