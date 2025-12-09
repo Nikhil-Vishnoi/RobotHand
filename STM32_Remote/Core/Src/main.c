@@ -135,7 +135,7 @@ int main(void)
 //	  i++;
 //	  Nora_command("AT\r\n");
 	  HAL_ADC_Start(&hadc);
-	  HAL_Delay(100);
+	  HAL_Delay(50);
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 	  char str_buffer[500];
 	  if(thm == -1 || thm < adc_val[4]) {

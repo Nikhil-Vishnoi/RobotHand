@@ -886,8 +886,8 @@ int main(void)
  80006e0:	4bb3      	ldr	r3, [pc, #716]	@ (80009b0 <main+0x37c>)
  80006e2:	0018      	movs	r0, r3
  80006e4:	f000 ff04 	bl	80014f0 <HAL_ADC_Start>
-	  HAL_Delay(100);
- 80006e8:	2064      	movs	r0, #100	@ 0x64
+	  HAL_Delay(50);
+ 80006e8:	2032      	movs	r0, #50	@ 0x32
  80006ea:	f000 fd69 	bl	80011c0 <HAL_Delay>
 	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
  80006ee:	4bb1      	ldr	r3, [pc, #708]	@ (80009b4 <main+0x380>)
